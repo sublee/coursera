@@ -48,6 +48,17 @@ func ltoa(l []int) string {
 	return buf.String()
 }
 
+// min returns the smaller number.
+//
+//   min(1, 2) -> 1
+//
+func min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
+
 // get returns the number at the offset or 0.
 //
 //   get([]int{1}, 0) -> 1
@@ -139,30 +150,6 @@ func sub(x, y []int) []int {
 	return unpad(z)
 }
 
-// mul1 multiplies two reversed slices of digits,
-// but each slice should have only one digit.
-//
-//   mul1([]int{4}, []int{2}) -> []int{8}
-//
-func mul1(x, y []int) []int {
-	z := get(x, 0) * get(y, 0)
-	if z < 10 {
-		return []int{z}
-	}
-	return []int{z % 10, z / 10}
-}
-
-// min returns the smaller number.
-//
-//   min(1, 2) -> 1
-//
-func min(x, y int) int {
-	if x < y {
-		return x
-	}
-	return y
-}
-
 // mul multiplies two reversed slices of digits in the Karatsuba algorithm.
 //
 //   mul1([]int{2, 4}, []int{4, 2}) -> []int{8, 0, 0, 1}
@@ -177,11 +164,12 @@ func mul(x, y []int) []int {
 	}
 
 	// Stop the recursion.
-	if n == 0 {
+	switch n {
+	case 0:
 		return []int{0}
-	}
-	if n == 1 {
-		return mul1(x, y)
+	case 1:
+		z := get(x, 0) * get(y, 0)
+		return unpad([]int{z % 10, z / 10})
 	}
 
 	// Normalize n as an even number.
