@@ -1,55 +1,70 @@
-package main
+/*
+Package karatsuba implements the Karatsuba algorithm for my homework.
+*/
+package karatsuba
 
 import (
 	"bytes"
-	"fmt"
 	"strconv"
 )
 
-func main() {
-	fmt.Println(Karatsuba("123", "456"))
-}
-
+// Karatsuba multiplies 2 large integers in the Karatsuba algorithm.
 func Karatsuba(x, y string) string {
-	x_ := make([]int, 0)
-	y_ := make([]int, 0)
+	_x := make([]int, 0)
+	_y := make([]int, 0)
 
-	for i := len(x); i >= 0; i-- {
+	for i := len(x) - 1; i >= 0; i-- {
 		n, _ := strconv.Atoi(string(x[i]))
-		x_ = append(x_, n)
+		_x = append(_x, n)
 	}
-	for i := len(y); i >= 0; i-- {
+	for i := len(y) - 1; i >= 0; i-- {
 		n, _ := strconv.Atoi(string(y[i]))
-		y_ = append(y_, n)
+		_y = append(_y, n)
 	}
 
-	z := karatsuba(x_, y_)
+	z := mul(_x, _y)
 
 	var buf bytes.Buffer
-	for i := len(z); i >= 0; i-- {
+	for i := len(z) - 1; i >= 0; i-- {
 		buf.WriteString(strconv.Itoa(z[i]))
 	}
 	return buf.String()
 }
 
-func karatsuba(x, y []int) []int {
-	n := len(x)
-	// if len(y) > n {
-	// 	n = len(y)
-	// }
+func mul(x, y []int) []int {
+	n, xn, yn := 0, len(x), len(y)
+	if xn > n {
+		n = xn
+	}
+	if yn > n {
+		n = yn
+	}
 
-	a := x[:n/2]
-	b := x[n/2:]
+	// Stop the recursion.
+	if n == 1 {
+		return mul1(x, y)
+	}
 
-	c := y[:n/2]
-	d := y[n/2:]
+	// Normalize n as an even number.
+	n += n % 2
 
-	ac := karatsuba(a, c)
-	bd := karatsuba(b, d)
-	abcd := karatsuba(add(a, b), add(c, d))
-	sub(sub(abcd, bd), ac)
+	a := x[n/2:]
+	b := x[:n/2]
+	c := y[n/2:]
+	d := y[:n/2]
 
-	return nil
+	ac := mul(a, c)
+	bd := mul(b, d)
+
+	// (a+b)(c+d)
+	abcd := mul(add(a, b), add(c, d))
+	// ad+bc = (a+b)(c+d)-bd-ac
+	adbc := sub(sub(abcd, bd), ac)
+
+	return add(
+		add(shift(ac, n), bd),
+		shift(adbc, n/2),
+	)
 }
 
 func get(a []int, i int) int {
@@ -57,6 +72,18 @@ func get(a []int, i int) int {
 		return a[i]
 	}
 	return 0
+}
+
+func shift(n []int, shift int) []int {
+	m := make([]int, shift+len(n))
+
+	for i := 0; i < shift; i++ {
+		m[i] = 0
+	}
+
+	copy(m[shift:], n)
+
+	return m
 }
 
 func unpad(n []int) []int {
@@ -108,4 +135,12 @@ func sub(x, y []int) []int {
 	}
 
 	return unpad(z)
+}
+
+func mul1(x, y []int) []int {
+	z := get(x, 0) * get(y, 0)
+	if z < 10 {
+		return []int{z}
+	}
+	return []int{z % 10, z / 10}
 }
