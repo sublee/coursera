@@ -152,6 +152,13 @@ func mul1(x, y []int) []int {
 	return []int{z % 10, z / 10}
 }
 
+func min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
+
 // mul multiplies two reversed slices of digits in the Karatsuba algorithm.
 //
 //   mul1([]int{2, 4}, []int{4, 2}) -> []int{8, 0, 0, 1}
@@ -166,6 +173,9 @@ func mul(x, y []int) []int {
 	}
 
 	// Stop the recursion.
+	if n == 0 {
+		return []int{0}
+	}
 	if n == 1 {
 		return mul1(x, y)
 	}
@@ -173,9 +183,9 @@ func mul(x, y []int) []int {
 	// Normalize n as an even number.
 	n += n % 2
 
-	a := x[n/2:]
+	a := x[min(len(x), n/2):]
 	b := x[:n/2]
-	c := y[n/2:]
+	c := y[min(len(y), n/2):]
 	d := y[:n/2]
 
 	ac := mul(a, c)
