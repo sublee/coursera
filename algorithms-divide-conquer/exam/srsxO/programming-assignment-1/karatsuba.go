@@ -152,6 +152,10 @@ func mul1(x, y []int) []int {
 	return []int{z % 10, z / 10}
 }
 
+// min returns the smaller number.
+//
+//   min(1, 2) -> 1
+//
 func min(x, y int) int {
 	if x < y {
 		return x
